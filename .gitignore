@@ -1,0 +1,19 @@
+# Ignore operating system files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE configuration files
+.vscode/
+.idea/
+
+# Ignore build artifacts
+build/
+dist/
+
+# Ignore Env
+__pycache__/
+venv/
+output/
+
+# Ignore log files
+*.log
