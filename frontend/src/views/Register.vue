@@ -326,10 +326,10 @@ const handleRegister = async () => {
   if (!isFormValid.value) return
 
   const result = await authStore.register({
-    firstName: form.firstName,
-    lastName: form.lastName,
+    username: form.email, // 또는 별도의 username 입력란이 있으면 그 값
     email: form.email,
-    organization: form.organization,
+    full_name: form.firstName + ' ' + form.lastName,
+    role: 'student',
     password: form.password
   })
 
