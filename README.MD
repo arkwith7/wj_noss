@@ -1,189 +1,95 @@
-# NOSS (National Occupational Skills Standard) 교육과정 자동 생성 시스템
+# NOSS 기반 교육과정 계획서 자동 생성 시스템
 
-## 📋 프로젝트 개요
+## 🎯 시스템 개요
 
-이 프로젝트는 NOSS (National Occupational Skills Standard) PDF 문서와 Excel 데이터를 분석하여 자동으로 교육과정 계획서(Lesson Plan)를 생성하는 지능형 웹 애플리케이션입니다. 
+NOSS (국가직무능력표준) PDF 문서와 Excel 데이터를 활용하여 AI 기반으로 교육과정 계획서를 자동 생성하는 지능형 웹 애플리케이션입니다.
 
-**현재 상태**: Flask 기반 웹 애플리케이션
-**전환 계획**: **Vue.js 3 + FastAPI** 풀스택 아키텍처로 현대화 예정
+## 🏗️ 시스템 아키텍처
 
-Google의 Gemini AI를 활용하여 PDF에서 역량 단위 정보를 자동 추출하고, Excel 데이터와 매칭하여 실습용(LPP)과 이론용(LPT) 교육과정 문서를 자동 생성합니다.
+### 기술 스택
 
-## 🎯 주요 기능
+*   **Frontend**: Vue.js 3 (Vite, Pinia, Vue Router) - 반응형 웹 UI
+*   **Backend**: FastAPI (Python) - 고성능 API 서버
+*   **AI Engine**: Azure OpenAI + RAG (Retrieval-Augmented Generation) - 지능형 문서 처리 및 생성
+*   **Vector Database**: FAISS 또는 유사 벡터 스토어 - 문서 임베딩 저장 및 검색
+*   **Authentication**: JWT (JSON Web Tokens) - 보안 인증
+*   **Real-time Communication**: WebSocket - 실시간 상태 업데이트
 
-- **🔍 PDF 분석**: NOSS PDF 문서에서 역량 단위(Competency Unit) 정보 자동 추출
-- **📊 Excel 처리**: 교육과정 데이터가 포함된 Excel 파일 처리 및 매칭
-- **🤖 AI 기반 데이터 추출**: Google Gemini AI를 활용한 구조화된 데이터 추출
-- **📝 템플릿 기반 문서 생성**: Word 템플릿을 활용한 교육과정 계획서 자동 생성
-- **🎨 현대적 웹 UI**: Vue.js 3 기반 반응형 사용자 인터페이스
-- **⚡ 실시간 처리**: WebSocket을 통한 실시간 상태 업데이트 및 진행률 표시
-- **📱 반응형 디자인**: 모바일, 태블릿, 데스크톱 최적화
-- **🔐 보안**: JWT 인증 및 파일 업로드 보안
+## 📋 핵심 기능
 
-## 🏗️ 현재 프로젝트 구조 (Flask 기반)
+### 1. 문서 처리 및 분석
 
-```
-wj_noss/
-├── main.py                     # 메인 처리 로직 (콘솔용)
-├── main_test.py               # 테스트 처리 로직
-├── app.py                     # Flask 웹 애플리케이션
-├── competency_unit.py         # 데이터 모델 클래스
-├── process_pdf.py             # PDF 처리 모듈
-├── process_excel.py           # Excel 처리 모듈
-├── create_lesson_plan.py      # 교육과정 생성 모듈
-├── requirements.txt           # Python 의존성
-├── input/                     # 입력 파일 디렉토리
-│   ├── cu_excel_sheets/       # 역량 단위별 Excel 시트
-│   └── uploads/               # 업로드된 파일
-├── output/                    # 생성된 파일
-├── templates/                 # Flask HTML 템플릿
-│   ├── upload.html            # 기본 업로드 페이지
-│   ├── upload_htmx.html       # HTMX 기반 업로드 페이지
-│   └── lesson_plan_templates/ # Word 템플릿
-│       ├── lpp/               # 실습용 교육과정 템플릿
-│       └── lpt/               # 이론용 교육과정 템플릿
-└── README.md                  # 프로젝트 문서
-```
+*   **PDF 분석**: NOSS PDF에서 역량 단위(Competency Unit), 능력단위요소, 작업상황 등 정보 자동 추출
+*   **Excel 처리**: 교육과정 관련 데이터(교과목, 훈련시간 등) 처리 및 PDF 내용과 매칭
+*   **지능형 청킹**: 의미 단위별 적절한 크기로 문서를 분할하여 AI 처리 효율 증대
 
-## 🔮 개선된 프로젝트 구조 (Vue.js + FastAPI, Hybrid RAG)
+### 2. AI 기반 데이터 추출 및 활용
 
-```
-wj_noss/
-├── frontend/                    # Vue.js 3 Frontend
-│   ├── public/
-│   ├── src/
-│   │   ├── main.js
-│   │   ├── App.vue
-│   │   ├── components/
-│   │   ├── views/
-│   │   ├── store/
-│   │   ├── router/
-│   │   ├── services/
-│   │   ├── composables/
-│   │   └── assets/
-│   ├── package.json
-│   ├── vite.config.js
-│   └── tailwind.config.js
-│
-├── backend/                     # FastAPI Backend (Hybrid RAG)
-│   ├── app/
-│   │   ├── __init__.py
-│   │   ├── main.py             # FastAPI 진입점
-│   │   ├── config.py           # 환경설정 (AI 서비스 타입 등)
-│   │   ├── dependencies.py
-│   │   ├── models/             # Pydantic 모델
-│   │   │   ├── __init__.py
-│   │   │   ├── enhanced_competency_unit.py # 확장 데이터 모델
-│   │   │   ├── requests.py
-│   │   │   └── responses.py
-│   │   ├── api/
-│   │   │   ├── __init__.py
-│   │   │   ├── v1/
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── endpoints/
-│   │   │   │   │   ├── upload.py
-│   │   │   │   │   ├── processing.py
-│   │   │   │   │   ├── files.py
-│   │   │   │   │   ├── ai_switch.py      # AI 서비스 선택/상태
-│   │   │   │   │   └── websocket.py
-│   │   │   │   └── api.py
-│   │   ├── services/           # 비즈니스 로직 (계층별 분리)
-│   │   │   ├── document_processing/
-│   │   │   │   ├── enhanced_pdf_processor.py
-│   │   │   │   ├── azure_openai_data_extractor.py
-│   │   │   │   └── ollama_data_extractor.py
-│   │   │   ├── knowledge_management/
-│   │   │   │   └── rag_knowledge_manager.py
-│   │   │   ├── template_engine/
-│   │   │   │   └── smart_template_engine.py
-│   │   │   ├── pdf_service.py
-│   │   │   ├── excel_service.py
-│   │   │   ├── lesson_plan_service.py
-│   │   │   └── websocket_service.py
-│   │   ├── core/
-│   │   │   ├── __init__.py
-│   │   │   ├── security.py
-│   │   │   ├── events.py
-│   │   │   └── exceptions.py
-│   │   └── utils/
-│   │       ├── __init__.py
-│   │       ├── file_utils.py
-│   │       └── validation.py
-│   ├── requirements.txt
-│   └── Dockerfile
-│
-├── shared/                     # 공통 타입 정의 (TypeScript)
-│   └── types/
-│       ├── api.ts
-│       └── models.ts
-│
-├── input/                      # 입력 파일 디렉토리
-├── output/                     # 생성된 파일
-├── templates/                  # Word 템플릿
-├── docker-compose.yml          # 전체 서비스 오케스트레이션
-├── .env.example                # 환경 변수 예시 (AI 서비스 타입, DB 등)
-└── README.md
-```
+*   **Azure OpenAI**: GPT 모델을 활용한 구조화된 데이터 추출, 내용 요약, 질문 답변
+*   **RAG 시스템**: 벡터 스토어에 저장된 문서 임베딩을 기반으로 사용자의 질의나 시스템의 필요에 따라 관련 정보 검색 및 추출
+*   **임베딩**: 처리된 문서를 벡터로 변환하여 벡터 스토어에 저장 (검색 및 유사도 분석용)
 
-### 🧠 AI 서비스 및 데이터베이스 계층
+### 3. 자동 교육과정 계획서 생성
 
-- **AI 서비스**: Azure OpenAI, Ollama(로컬 LLM), Hybrid(선택적)
-- **Vector DB**: Qdrant
-- **Metadata DB**: PostgreSQL
-- **캐시/큐**: Redis, Celery
+*   **템플릿 기반**: 사용자가 등록한 Word(.docx) 템플릿을 활용하여 다양한 양식의 문서 생성
+*   **이원화 출력**:
+    *   **LPP (Lesson Plan for Practice)**: 실습 중심 교과목을 위한 교육과정 계획서
+    *   **LPT (Lesson Plan for Theory)**: 이론 중심 교과목을 위한 교육과정 계획서
+*   **커스터마이징**: 생성된 계획서의 세부 내용 편집 및 조정 기능 (향후 확장)
 
-### 🏗️ 서비스 계층별 주요 모듈
+## 📁 문서 관리 체계
 
-- **Document Processing**: PDF/Excel 추출, AI 기반 구조화, 품질 검증
-- **Knowledge Management (RAG)**: 벡터 임베딩, 하이브리드 검색, 재순위화
-- **Template Engine**: 템플릿 기반 문서 생성, AI 콘텐츠 생성, 품질 평가
-- **AI Switch**: Azure/Ollama/Hybrid 선택 및 상태 관리
+### 관리 대상 문서 (3가지 주요 분류)
 
-### ⚙️ 환경설정 예시 (.env.example)
+1.  **NOSS PDF 문서**: 국가직무능력표준 분류체계에 따른 원본 표준 문서
+2.  **Excel 데이터**: 각 NOSS 분류와 연관된 교과목 정보, 훈련 목표, 평가 방법 등 교육과정 구성 요소
+3.  **Word 템플릿**: 최종 출력될 교육과정 계획서의 양식 및 레이아웃을 정의하는 문서
 
-```
-AI_SERVICE_TYPE=hybrid   # azure | ollama | hybrid
-AZURE_OPENAI_ENDPOINT=...
-AZURE_OPENAI_API_KEY=...
-OLLAMA_HOST=localhost
-OLLAMA_PORT=11434
-QDRANT_URL=http://qdrant:6333
-POSTGRES_URL=postgresql://user:pass@db:5432/wj_noss
-REDIS_URL=redis://redis:6379/0
-```
+### 벡터 스토어 관리
 
-### 🐳 docker-compose.yml 주요 서비스
+*   **원문 및 임베딩 저장**: 분석된 NOSS 문서와 Excel 데이터의 주요 내용을 청크 단위로 저장하고, 해당 청크의 벡터 임베딩 결과를 보관
+*   **유사도 검색**: 사용자 질의 또는 시스템 내부 요청에 따라 벡터 스토어에서 관련성 높은 콘텐츠 조각을 신속하게 검색 및 추출
+*   **정보 매칭**: 검색된 정보를 바탕으로 AI가 답변을 생성하거나, 문서 생성 시 필요한 내용을 효과적으로 구성
 
-- fastapi-backend (backend/app)
-- vue-frontend (frontend)
-- qdrant (벡터DB)
-- postgres (메타데이터DB)
-- redis (캐시/큐)
-- ollama (로컬 LLM, 선택적)
+## 🖥️ 사용자 인터페이스 (UI)
 
-### 🚀 실행 방법 (개발/운영)
+### Home 페이지 (`frontend/src/views/Home.vue`)
 
-```bash
-# Backend 실행
-cd backend
-uvicorn app.main:app --reload --port 8000
+*   **시스템 관문 역할**: 로그인 후 사용자가 처음으로 마주하는 대시보드 형태의 메인 화면
+*   **통합 문서 검색 기능**: 시스템에 등록된 모든 NOSS 문서, Excel 데이터, 생성된 계획서 등에 대한 내용 기반 통합 검색 제공
+*   **주요 정보 및 기능 접근**: 시스템 상태 요약, 최근 활동, 문서 업로드, 신규 계획서 생성 등 주요 기능으로의 빠른 접근 경로 제공
+*   **파일 업로드**: 드래그앤드롭 또는 파일 선택기를 통한 직관적인 문서 업로드 (PDF, Excel, Word)
+*   **실시간 처리 상태**: WebSocket을 통해 파일 처리, AI 분석, 문서 생성 등의 진행 상황을 실시간으로 사용자에게 알림
 
-# Frontend 실행
-cd frontend
-npm run dev
+### UI 특징
 
-# 전체 서비스 (Docker)
-docker-compose up -d
-```
+*   **반응형 디자인**: 다양한 화면 크기(모바일, 태블릿, 데스크톱)에 최적화된 UI 제공
+*   **현대적 인터페이스**: Vue.js 3와 Tailwind CSS를 활용한 직관적이고 사용자 친화적인 모던 웹 UI 구현
+*   **실시간 업데이트 및 피드백**: WebSocket 및 비동기 통신을 활용하여 사용자 작업에 대한 즉각적인 피드백 및 상태 업데이트 제공
 
-### 📦 데이터 모델 (예시: EnhancedCompetencyUnit)
+## ⚡ 주요 워크플로우
 
-- Pydantic 기반, 메타데이터/품질/매칭정보 포함 (README 하단 참고)
+1.  **사용자 로그인**: JWT 기반의 안전한 인증 절차를 통해 시스템 접근
+2.  **문서 업로드**: 사용자는 Home 페이지 또는 문서 관리 메뉴를 통해 NOSS PDF, 관련 Excel 데이터, Word 템플릿 파일 업로드
+    *   업로드 시 파일 형식, 크기 등 기본 유효성 검사 수행
+    *   대용량 파일 업로드 시 프로그레스 바를 통해 진행률 표시
+3.  **AI 기반 분석 및 추출**: 업로드된 문서는 백엔드에서 AI 엔진을 통해 분석
+    *   PDF에서 핵심 정보(역량 단위, 능력단위요소 등) 추출
+    *   Excel 데이터 파싱 및 NOSS 정보와 연계
+    *   문서 내용을 의미 단위로 청킹
+4.  **임베딩 및 벡터 스토어 저장**: 분석된 문서의 청크들은 벡터로 변환되어 검색 가능한 형태로 벡터 스토어에 저장
+5.  **교육과정 계획서 생성 요청**: 사용자는 원하는 NOSS 문서, Excel 데이터, Word 템플릿을 선택하여 교육과정 계획서 생성을 요청
+6.  **AI 기반 정보 종합 및 문서 생성**: 시스템은 RAG 파이프라인을 통해 벡터 스토어에서 관련 정보를 검색하고, Azure OpenAI를 활용하여 선택된 Word 템플릿에 맞춰 교육과정 계획서 초안을 생성
+7.  **LPP/LPT 교육과정 계획서 출력 및 다운로드**: 생성된 교육과정 계획서(LPP 또는 LPT 형태)를 사용자에게 제공하며, DOCX 또는 PDF 파일로 다운로드 지원
 
-### 📝 참고
+## 🔐 보안 및 기타 기능
 
-- AI 서비스 타입은 config.py 및 .env에서 손쉽게 전환 가능
-- 하이브리드 모드: 일반 문서는 Azure, 민감 문서는 Ollama로 자동 라우팅
-- 서비스별 상세 구현 및 API 문서는 `/docs` (FastAPI)에서 확인
+*   **JWT 인증**: 모든 API 요청에 대해 JWT 토큰을 사용하여 안전한 사용자 인증 및 인가 처리
+*   **파일 업로드 보안**: 업로드되는 파일에 대한 검사 및 안전한 저장/처리 로직 구현
+*   **실시간 상태 업데이트**: WebSocket을 통해 파일 처리, AI 분석, 문서 생성 등 주요 작업의 진행률 및 결과를 실시간으로 사용자에게 피드백
+*   **통합 검색 기능**: 사용자가 시스템 내에 축적된 다양한 문서와 데이터를 키워드 기반으로 쉽게 검색하고 활용
+*   **오류 처리 및 로깅**: 사용자 작업 중 발생할 수 있는 오류에 대한 명확한 안내 및 시스템 로깅
 
 ---
+
+이 시스템은 교육 기관 및 전문가들이 NOSS 기반의 교육과정을 보다 효율적이고 체계적으로 개발하고 관리할 수 있도록 지원하는 것을 목표로 합니다. AI 기술과 문서 자동화 기술을 결합하여 교육 자료 준비에 소요되는 시간과 노력을 절감하고, 교육 내용의 질을 향상시키는 데 기여할 것입니다.
