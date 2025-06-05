@@ -17,3 +17,5 @@ output/
 
 # Ignore log files
 *.log
+
+frontend/node_modules

@@ -1,0 +1,39 @@
+<!-- templates/processing.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing PDF</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+    <style>
+        #output {
+            white-space: pre-wrap; /* Preserve whitespace */
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Processing PDF: {{ filename }}</h1>
+    <div id="output"></div>
+
+    <script>
+        const outputDiv = document.getElementById('output');
+        const socket = io();
+
+        socket.on('output', function(msg) {
+            outputDiv.innerHTML += msg.data + '<br>'; // Append new output
+            console.log(msg.data); // Log output to the console
+            outputDiv.scrollTop = outputDiv.scrollHeight; // Scroll to the bottom
+        });
+
+        socket.on('connect', function() {
+            console.log('Socket connected');
+        });
+
+        socket.on('disconnect', function() {
+            console.log('Socket disconnected');
+        });
+    </script>
+</body>
+</html>

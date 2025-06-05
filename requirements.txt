@@ -34,3 +34,37 @@ typing_extensions==4.12.2
 uritemplate==4.1.1
 urllib3==2.2.3
 XlsxWriter==3.2.0
+
+# 백엔드 API
+fastapi
+uvicorn[standard]
+pydantic
+pydantic[email]
+python-dotenv
+httpx
+aiofiles
+python-multipart
+
+# AI/LLM 연동
+openai
+azure-ai-ml
+azure-identity
+langchain
+
+# 데이터베이스 & 인증
+sqlalchemy
+python-jose[cryptography]
+passlib[bcrypt]
+alembic
+
+# 유틸리티
+python-slugify
+cryptography
+langchain-community
+
+# 벡터DB (Qdrant)
+qdrant-client
+
+# Redis & Celery
+redis
+celery[redis]
