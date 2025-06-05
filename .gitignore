@@ -19,3 +19,4 @@ output/
 *.log
 
 frontend/node_modules
+.env
