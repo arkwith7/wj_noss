@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOSS 교육과정 자동 생성 - FastAPI + HTMX</title>
+    
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Modern CSS Framework -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .upload-zone {
+            transition: all 0.3s ease;
+            border: 2px dashed #3498db;
+        }
+        
+        .upload-zone:hover {
+            border-color: #2980b9;
+            background: rgba(52, 152, 219, 0.1);
+        }
+        
+        .upload-zone.dragover {
+            border-color: #27ae60;
+            background: rgba(39, 174, 96, 0.1);
+        }
+        
+        .htmx-indicator {
+            display: none;
+        }
+        
+        .htmx-request .htmx-indicator {
+            display: block;
+        }
+        
+        .htmx-request .upload-zone {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        /* Progress Animation */
+        .progress-bar {
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            background-size: 200% 100%;
+            animation: gradient 2s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Log Animation */
+        .log-entry {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold mb-4">🎓 NOSS 교육과정 자동 생성</h1>
+            <p class="text-xl text-gray-300">AI 기반 PDF 분석 및 교육과정 계획서 생성</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="max-w-4xl mx-auto">
+            <!-- Upload Section -->
+            <div id="upload-section" class="glass-effect rounded-2xl p-8 mb-8">
+                <h2 class="text-2xl font-semibold mb-6 flex items-center">
+                    📄 PDF 파일 업로드
+                </h2>
+                
+                <form 
+                    hx-post="/api/v1/upload" 
+                    hx-encoding="multipart/form-data"
+                    hx-target="#result-section"
+                    hx-indicator="#upload-indicator"
+                    hx-swap="innerHTML"
+                    class="space-y-6"
+                >
+                    <!-- File Upload Zone -->
+                    <div class="upload-zone rounded-xl p-12 text-center cursor-pointer">
+                        <input 
+                            type="file" 
+                            name="file" 
+                            accept=".pdf" 
+                            required
+                            class="hidden"
+                            id="file-input"
+                            onchange="updateFileName(this)"
+                        >
+                        <label for="file-input" class="cursor-pointer">
+                            <div class="text-6xl mb-4">📎</div>
+                            <div class="text-xl mb-2">클릭하거나 파일을 드래그하여 업로드</div>
+                            <div class="text-gray-400">NOSS PDF 파일만 업로드 가능합니다</div>
+                            <div id="file-name" class="mt-4 text-green-400 font-semibold"></div>
+                        </label>
+                    </div>
+                    
+                    <!-- Upload Button -->
+                    <button 
+                        type="submit" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-300 transform hover:scale-105"
+                    >
+                        <span class="htmx-indicator">
+                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            처리 중...
+                        </span>
+                        <span class="upload-text">🚀 분석 시작</span>
+                    </button>
+                </form>
+                
+                <!-- Upload Indicator -->
+                <div id="upload-indicator" class="htmx-indicator mt-6">
+                    <div class="bg-gray-700 rounded-full h-2">
+                        <div class="progress-bar h-full rounded-full w-full"></div>
+                    </div>
+                    <p class="text-center mt-2 text-gray-300">파일을 업로드하고 있습니다...</p>
+                </div>
+            </div>
+
+            <!-- Result Section -->
+            <div id="result-section" class="space-y-6">
+                <!-- 처리 결과가 여기에 동적으로 로드됩니다 -->
+            </div>
+
+            <!-- Live Status Section (처리 시작 후 표시) -->
+            <div id="status-section" class="hidden glass-effect rounded-2xl p-8">
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    ⚡ 실시간 처리 상태
+                </h3>
+                
+                <!-- Progress Steps -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center">
+                        <div class="step flex items-center">
+                            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                            <span class="ml-2">PDF 업로드</span>
+                        </div>
+                        <div class="step flex items-center">
+                            <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                            <span class="ml-2">AI 분석</span>
+                        </div>
+                        <div class="step flex items-center">
+                            <div class="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                            <span class="ml-2">Excel 처리</span>
+                        </div>
+                        <div class="step flex items-center">
+                            <div class="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center text-sm font-bold">4</div>
+                            <span class="ml-2">문서 생성</span>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2 mt-4">
+                        <div class="progress-bar h-full rounded-full" style="width: 25%"></div>
+                    </div>
+                </div>
+                
+                <!-- Live Logs -->
+                <div 
+                    hx-get="/api/v1/logs/stream"
+                    hx-trigger="every 2s"
+                    hx-swap="innerHTML"
+                    class="bg-gray-900 rounded-xl p-4 h-64 overflow-y-auto"
+                >
+                    <div class="log-entry text-green-400">
+                        [2024-01-15 10:30:15] 시스템 초기화 완료
+                    </div>
+                    <div class="log-entry text-blue-400">
+                        [2024-01-15 10:30:16] PDF 파일 업로드 대기 중...
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Generated Files Section -->
+            <div 
+                id="files-section"
+                hx-get="/api/v1/files"
+                hx-trigger="every 5s"
+                hx-swap="innerHTML"
+                class="glass-effect rounded-2xl p-8"
+            >
+                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                    📁 생성된 파일
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- 파일 목록이 동적으로 로드됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Enhanced UX -->
+    <script>
+        // File name display
+        function updateFileName(input) {
+            const fileName = input.files[0]?.name;
+            const fileNameDiv = document.getElementById('file-name');
+            if (fileName) {
+                fileNameDiv.textContent = `선택된 파일: ${fileName}`;
+            }
+        }
+        
+        // Drag and drop functionality
+        const uploadZone = document.querySelector('.upload-zone');
+        const fileInput = document.getElementById('file-input');
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        });
+        
+        uploadZone.addEventListener('dragleave', () => {
+            uploadZone.classList.remove('dragover');
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateFileName(fileInput);
+            }
+        });
+        
+        // HTMX event listeners
+        document.addEventListener('htmx:beforeRequest', function(evt) {
+            document.getElementById('status-section').classList.remove('hidden');
+        });
+        
+        document.addEventListener('htmx:responseError', function(evt) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'bg-red-500 text-white p-4 rounded-xl mb-4';
+            errorDiv.innerHTML = `
+                <h4 class="font-bold">오류 발생</h4>
+                <p>파일 처리 중 오류가 발생했습니다. 다시 시도해주세요.</p>
+            `;
+            document.getElementById('result-section').appendChild(errorDiv);
+        });
+    </script>
+</body>
+</html>
