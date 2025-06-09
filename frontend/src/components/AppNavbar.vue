@@ -23,13 +23,13 @@
               >
                 Home
               </router-link>
-              <router-link
+              <!-- <router-link
                 to="/dashboard"
                 class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                 :class="{ 'border-b-2 border-blue-500 text-gray-900 dark:text-white': $route.name === 'Dashboard' }"
               >
                 Dashboard
-              </router-link>
+              </router-link> -->
               <router-link
                 to="/chat"
                 class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
@@ -166,13 +166,13 @@
           >
             Home
           </router-link>
-          <router-link
+          <!-- <router-link
             to="/dashboard"
             class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md"
             @click="appStore.closeSidebar"
           >
             Dashboard
-          </router-link>
+          </router-link> -->
           <router-link
             to="/chat"
             class="block px-3 py-2 text-base font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700 rounded-md"
