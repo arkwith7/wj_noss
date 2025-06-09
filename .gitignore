@@ -21,4 +21,4 @@ output/
 frontend/node_modules
 backend/app/noss.db
 backend/.env
-
+backend/qdrant/qdrant_storage
